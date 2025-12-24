@@ -363,13 +363,17 @@
       }
 
       // Language dropdown
-      if (labelText.includes('language') || labelText.includes('communication') || selName.includes('language') || selId.includes('language')) {
+      if (labelText.includes('language') || labelText.includes('communication') || selName.includes('language') || selId.includes('language') || selName === 'preferredlanguage' || selId === 'preferredlanguage') {
         const langValue = account.language || 'english';
+        console.log('[FIFA] Found language dropdown, looking for:', langValue, 'Options:', opts.map(o => o.textContent));
         for (const opt of opts) {
-          if (opt.value.toLowerCase().includes(langValue.toLowerCase()) ||
+          if (opt.value.toLowerCase() === langValue.toLowerCase() ||
+              opt.textContent.toLowerCase() === langValue.toLowerCase() ||
+              opt.value.toLowerCase().includes(langValue.toLowerCase()) ||
               opt.textContent.toLowerCase().includes(langValue.toLowerCase())) {
             sel.value = opt.value;
             sel.dispatchEvent(new Event('change', { bubbles: true }));
+            sel.dispatchEvent(new Event('input', { bubbles: true }));
             filled++;
             console.log('[FIFA] Selected language:', opt.textContent);
             break;
@@ -494,6 +498,10 @@
       console.log('[FIFA] Auto-filled', filled, 'fields');
       showNotification(`Auto-filled ${filled} fields!`);
     }
+
+    // Wait 2 seconds and try again for any dropdowns that weren't loaded yet
+    await new Promise(r => setTimeout(r, 2000));
+    await runAutofill(currentAccount);
   }
 
   // Watch for dynamic content changes (SPA navigation)
