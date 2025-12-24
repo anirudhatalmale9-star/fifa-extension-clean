@@ -557,14 +557,15 @@
   function setupMutationObserver() {
     let debounceTimer = null;
     const observer = new MutationObserver((mutations) => {
-      // Check if new form elements were added
+      // Check if new form elements were added or page changed significantly
       let hasNewForms = false;
       for (const mutation of mutations) {
         if (mutation.addedNodes.length > 0) {
           for (const node of mutation.addedNodes) {
             if (node.nodeType === 1) {
               if (node.tagName === 'INPUT' || node.tagName === 'SELECT' ||
-                  node.querySelector?.('input, select')) {
+                  node.tagName === 'FORM' || node.tagName === 'DIV' ||
+                  node.querySelector?.('input, select, form')) {
                 hasNewForms = true;
                 break;
               }
@@ -575,15 +576,29 @@
       }
 
       if (hasNewForms) {
-        // Reset flag and debounce
+        // Reset flag and debounce - shorter delay for faster response
         autoFillAttempted = false;
         if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(autoFillPage, 800);
+        debounceTimer = setTimeout(() => {
+          console.log('[FIFA] Detected page change, running autofill...');
+          autoFillPage();
+        }, 500);
       }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
   }
+
+  // Also listen for URL changes (SPA navigation)
+  let lastUrl = location.href;
+  setInterval(() => {
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      console.log('[FIFA] URL changed, resetting autofill...');
+      autoFillAttempted = false;
+      setTimeout(autoFillPage, 500);
+    }
+  }, 500);
 
   // ========== TICKET SELECTOR FUNCTIONS ==========
   function delay(ms) {
