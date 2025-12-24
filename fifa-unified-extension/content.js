@@ -345,6 +345,38 @@
         }
         continue;
       }
+
+      // Gender dropdown
+      if (labelText.includes('gender') || selName.includes('gender') || selId.includes('gender')) {
+        const genderValue = account.gender || 'male';
+        for (const opt of opts) {
+          if (opt.value.toLowerCase().includes(genderValue.toLowerCase()) ||
+              opt.textContent.toLowerCase().includes(genderValue.toLowerCase())) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            filled++;
+            console.log('[FIFA] Selected gender:', opt.textContent);
+            break;
+          }
+        }
+        continue;
+      }
+
+      // Language dropdown
+      if (labelText.includes('language') || labelText.includes('communication') || selName.includes('language') || selId.includes('language')) {
+        const langValue = account.language || 'english';
+        for (const opt of opts) {
+          if (opt.value.toLowerCase().includes(langValue.toLowerCase()) ||
+              opt.textContent.toLowerCase().includes(langValue.toLowerCase())) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            filled++;
+            console.log('[FIFA] Selected language:', opt.textContent);
+            break;
+          }
+        }
+        continue;
+      }
     }
 
     return filled;
