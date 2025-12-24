@@ -242,11 +242,48 @@
 
     // Handle select dropdowns
     const selects = document.querySelectorAll('select');
+    console.log('[FIFA] Found', selects.length, 'select dropdowns');
+
     for (const sel of selects) {
       const opts = Array.from(sel.options);
       const optTexts = opts.map(o => o.textContent.toLowerCase());
       const selId = (sel.id || '').toLowerCase();
       const selName = (sel.name || '').toLowerCase();
+
+      console.log('[FIFA] Processing select:', selName || selId, 'with', opts.length, 'options:', optTexts.slice(0, 5));
+
+      // Direct FIFA dropdown targeting by ID/name
+      // Gender dropdown (FIFA uses id="gender" or name="gender")
+      if (selId === 'gender' || selName === 'gender') {
+        const genderValue = account.gender || 'male';
+        console.log('[FIFA] Found gender dropdown directly, looking for:', genderValue);
+        for (const opt of opts) {
+          if (opt.value && opt.value.toLowerCase() === genderValue.toLowerCase()) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            filled++;
+            console.log('[FIFA] Selected gender:', opt.textContent);
+            break;
+          }
+        }
+        continue;
+      }
+
+      // Language dropdown (FIFA uses id="preferredLanguage")
+      if (selId === 'preferredlanguage' || selName === 'preferredlanguage') {
+        const langValue = account.language || 'english';
+        console.log('[FIFA] Found preferredLanguage dropdown directly, looking for:', langValue);
+        for (const opt of opts) {
+          if (opt.value && opt.value.toLowerCase() === langValue.toLowerCase()) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            filled++;
+            console.log('[FIFA] Selected language:', opt.textContent);
+            break;
+          }
+        }
+        continue;
+      }
 
       let labelText = '';
       let parent = sel.parentElement;
