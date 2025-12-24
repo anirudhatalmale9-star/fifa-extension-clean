@@ -527,9 +527,9 @@
       return;
     }
 
-    // Wait 10 seconds for page to fully render before auto-filling
-    console.log('[FIFA] Waiting 10 seconds before auto-fill...');
-    await new Promise(r => setTimeout(r, 10000));
+    // Wait 2 seconds for page to fully render before auto-filling
+    console.log('[FIFA] Waiting 2 seconds before auto-fill...');
+    await new Promise(r => setTimeout(r, 2000));
 
     // Check if there are fillable fields on this page
     const inputs = document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"])');
