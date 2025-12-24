@@ -307,6 +307,60 @@
         continue;
       }
 
+      // Province/State dropdown - direct targeting
+      if (selId.includes('state') || selId.includes('province') || selId.includes('region') ||
+          selName.includes('state') || selName.includes('province') || selName.includes('region') ||
+          selId === 'addressstate' || selName === 'addressstate') {
+        if (account.province) {
+          const provinceValue = account.province.toUpperCase().trim();
+          const fullStateName = US_STATES[provinceValue] || account.province;
+          console.log('[FIFA] Found state/province dropdown directly:', selName || selId, 'Looking for:', provinceValue, '->', fullStateName);
+          console.log('[FIFA] Options:', opts.map(o => `${o.value}="${o.textContent}"`).slice(0, 10));
+
+          for (const opt of opts) {
+            const optValue = (opt.value || '').toLowerCase();
+            const optText = (opt.textContent || '').toLowerCase().trim();
+
+            // Try multiple matching strategies
+            if (optValue === provinceValue.toLowerCase() ||
+                optText === provinceValue.toLowerCase() ||
+                optValue === fullStateName.toLowerCase() ||
+                optText === fullStateName.toLowerCase() ||
+                optText.includes(fullStateName.toLowerCase()) ||
+                optValue.includes(fullStateName.toLowerCase())) {
+              sel.value = opt.value;
+              sel.dispatchEvent(new Event('change', { bubbles: true }));
+              sel.dispatchEvent(new Event('input', { bubbles: true }));
+              filled++;
+              console.log('[FIFA] Selected state/province:', opt.textContent, 'value:', opt.value);
+              break;
+            }
+          }
+        }
+        continue;
+      }
+
+      // Check if this dropdown has US states (by looking at option texts)
+      const hasUSStates = optTexts.some(t => t === 'california' || t === 'texas' || t === 'new york' || t === 'florida');
+      if (hasUSStates && account.province) {
+        const provinceValue = account.province.toUpperCase().trim();
+        const fullStateName = US_STATES[provinceValue] || account.province;
+        console.log('[FIFA] Detected US states dropdown:', selName || selId, 'Looking for:', fullStateName);
+
+        for (const opt of opts) {
+          const optText = (opt.textContent || '').toLowerCase().trim();
+          if (optText === fullStateName.toLowerCase()) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            sel.dispatchEvent(new Event('input', { bubbles: true }));
+            filled++;
+            console.log('[FIFA] Selected state from US states dropdown:', opt.textContent, 'value:', opt.value);
+            break;
+          }
+        }
+        continue;
+      }
+
       let labelText = '';
       let parent = sel.parentElement;
       for (let i = 0; i < 3 && parent; i++) {
