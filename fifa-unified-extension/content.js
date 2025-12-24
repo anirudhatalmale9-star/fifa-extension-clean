@@ -21,6 +21,21 @@
     { matchNumber: 47, category: 1, quantity: 4 },
   ];
   const ACTION_DELAY = 50;
+
+  // US State abbreviations to full names
+  const US_STATES = {
+    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+    'DC': 'District of Columbia'
+  };
   // ========== END CONFIG ==========
 
   // Parse matches string from CSV to config array
@@ -292,12 +307,23 @@
 
       // State/Province dropdown
       if ((selId.includes('state') || selId.includes('province') || selName.includes('state') || selName.includes('province') || labelText.includes('state') || labelText.includes('province')) && account.province) {
+        const provinceValue = account.province.toUpperCase().trim();
+        const fullStateName = US_STATES[provinceValue] || account.province;
+
         for (const opt of opts) {
-          if (opt.value.toLowerCase().includes(account.province.toLowerCase()) ||
-              opt.textContent.toLowerCase().includes(account.province.toLowerCase())) {
+          const optVal = opt.value.toLowerCase();
+          const optText = opt.textContent.toLowerCase();
+          // Try matching abbreviation (CA), full name (California), or partial match
+          if (optVal === provinceValue.toLowerCase() ||
+              optText === provinceValue.toLowerCase() ||
+              optVal.includes(fullStateName.toLowerCase()) ||
+              optText.includes(fullStateName.toLowerCase()) ||
+              optVal === fullStateName.toLowerCase() ||
+              optText === fullStateName.toLowerCase()) {
             sel.value = opt.value;
             sel.dispatchEvent(new Event('change', { bubbles: true }));
             filled++;
+            console.log('[FIFA] Selected state/province:', opt.textContent);
             break;
           }
         }
