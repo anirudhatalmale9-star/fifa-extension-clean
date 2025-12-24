@@ -379,7 +379,73 @@
       }
     }
 
+    // Handle custom dropdown components (PrimeNG, React, etc.)
+    // These are div-based dropdowns that need to be clicked to open
+    await handleCustomDropdowns(account);
+
     return filled;
+  }
+
+  // Handle custom dropdown components (div-based, not standard select)
+  async function handleCustomDropdowns(account) {
+    // Find all elements that look like dropdown triggers
+    const dropdownTriggers = document.querySelectorAll('[class*="dropdown"], [class*="select"], [role="listbox"], [role="combobox"], [aria-haspopup="listbox"]');
+
+    for (const trigger of dropdownTriggers) {
+      const triggerText = trigger.textContent?.toLowerCase() || '';
+      const parentText = trigger.parentElement?.textContent?.toLowerCase() || '';
+      const grandParentText = trigger.parentElement?.parentElement?.textContent?.toLowerCase() || '';
+      const context = triggerText + ' ' + parentText + ' ' + grandParentText;
+
+      // Gender dropdown
+      if (context.includes('gender') && (context.includes('select') || context.includes('choose'))) {
+        const genderValue = account.gender || 'male';
+        await clickCustomDropdownOption(trigger, genderValue);
+      }
+
+      // Language dropdown
+      if ((context.includes('language') || context.includes('communication')) && (context.includes('choose') || context.includes('select'))) {
+        const langValue = account.language || 'english';
+        await clickCustomDropdownOption(trigger, langValue);
+      }
+
+      // Province/State dropdown (custom)
+      if ((context.includes('state') || context.includes('province')) && (context.includes('select') || context.includes('choose'))) {
+        const provinceValue = account.province?.toUpperCase()?.trim() || '';
+        const fullStateName = US_STATES[provinceValue] || account.province || '';
+        if (fullStateName) {
+          await clickCustomDropdownOption(trigger, fullStateName);
+        }
+      }
+    }
+  }
+
+  // Click a custom dropdown and select an option
+  async function clickCustomDropdownOption(trigger, valueToSelect) {
+    try {
+      // Click to open dropdown
+      trigger.click();
+      await new Promise(r => setTimeout(r, 300));
+
+      // Find the dropdown panel/options
+      const options = document.querySelectorAll('[role="option"], [class*="dropdown-item"], [class*="option"], li[class*="p-dropdown"]');
+
+      for (const opt of options) {
+        const optText = opt.textContent?.toLowerCase() || '';
+        if (optText.includes(valueToSelect.toLowerCase())) {
+          opt.click();
+          console.log('[FIFA] Clicked custom dropdown option:', opt.textContent);
+          await new Promise(r => setTimeout(r, 100));
+          return true;
+        }
+      }
+
+      // Close dropdown if no match found (click elsewhere)
+      document.body.click();
+    } catch (e) {
+      console.log('[FIFA] Error with custom dropdown:', e);
+    }
+    return false;
   }
 
   // Show notification
