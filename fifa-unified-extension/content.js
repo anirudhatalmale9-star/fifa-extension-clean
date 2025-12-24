@@ -255,14 +255,21 @@
       // Direct FIFA dropdown targeting by ID/name
       // Gender dropdown (FIFA uses id="gender" or name="gender")
       if (selId === 'gender' || selName === 'gender') {
-        const genderValue = account.gender || 'male';
-        console.log('[FIFA] Found gender dropdown directly, looking for:', genderValue);
+        const genderValue = (account.gender || 'male').toLowerCase();
+        console.log('[FIFA] Found gender dropdown directly, looking for:', genderValue, 'Options:', opts.map(o => `${o.value}="${o.textContent}"`));
         for (const opt of opts) {
-          if (opt.value && opt.value.toLowerCase() === genderValue.toLowerCase()) {
+          const optValue = (opt.value || '').toLowerCase();
+          const optText = (opt.textContent || '').toLowerCase().trim();
+          // Match by value or text content
+          if (optValue === genderValue || optText === genderValue ||
+              optValue.includes(genderValue) || optText.includes(genderValue) ||
+              (genderValue === 'male' && (optValue === 'm' || optText === 'male')) ||
+              (genderValue === 'female' && (optValue === 'f' || optText === 'female'))) {
             sel.value = opt.value;
             sel.dispatchEvent(new Event('change', { bubbles: true }));
+            sel.dispatchEvent(new Event('input', { bubbles: true }));
             filled++;
-            console.log('[FIFA] Selected gender:', opt.textContent);
+            console.log('[FIFA] Selected gender:', opt.textContent, 'value:', opt.value);
             break;
           }
         }
@@ -271,14 +278,19 @@
 
       // Language dropdown (FIFA uses id="preferredLanguage")
       if (selId === 'preferredlanguage' || selName === 'preferredlanguage') {
-        const langValue = account.language || 'english';
-        console.log('[FIFA] Found preferredLanguage dropdown directly, looking for:', langValue);
+        const langValue = (account.language || 'english').toLowerCase();
+        console.log('[FIFA] Found preferredLanguage dropdown directly, looking for:', langValue, 'Options:', opts.map(o => `${o.value}="${o.textContent}"`));
         for (const opt of opts) {
-          if (opt.value && opt.value.toLowerCase() === langValue.toLowerCase()) {
+          const optValue = (opt.value || '').toLowerCase();
+          const optText = (opt.textContent || '').toLowerCase().trim();
+          // Match by value or text content
+          if (optValue === langValue || optText === langValue ||
+              optValue.includes(langValue) || optText.includes(langValue)) {
             sel.value = opt.value;
             sel.dispatchEvent(new Event('change', { bubbles: true }));
+            sel.dispatchEvent(new Event('input', { bubbles: true }));
             filled++;
-            console.log('[FIFA] Selected language:', opt.textContent);
+            console.log('[FIFA] Selected language:', opt.textContent, 'value:', opt.value);
             break;
           }
         }
