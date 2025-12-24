@@ -163,8 +163,8 @@
         if (setValue(input, account.password)) filled++;
         continue;
       }
-      // Phone
-      if ((tp === 'tel' || nm.includes('phone')) && account.phone) {
+      // Phone / Mobile
+      if ((tp === 'tel' || nm.includes('phone') || nm.includes('mobile') || nm.includes('cell') || id.includes('phone') || id.includes('mobile') || ph.includes('phone') || ph.includes('mobile') || context.includes('phone') || context.includes('mobile')) && account.phone) {
         if (setValue(input, account.phone)) filled++;
         continue;
       }
@@ -191,6 +191,11 @@
       // Zip
       if ((nm.includes('zip') || nm.includes('postal')) && account.zip_code) {
         if (setValue(input, account.zip_code)) filled++;
+        continue;
+      }
+      // Province / State (as input field)
+      if ((nm.includes('province') || nm.includes('state') || nm.includes('region') || id.includes('province') || id.includes('state') || ph.includes('province') || ph.includes('state') || context.includes('province') || context.includes('state')) && account.province) {
+        if (setValue(input, account.province)) filled++;
         continue;
       }
     }
