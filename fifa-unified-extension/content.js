@@ -565,8 +565,7 @@
             console.log('[FIFA] Removing used account:', removedAccount.email);
 
             // Remove the account at selectedRow
-            accounts.splice(selectedRow, 0);
-            accounts = accounts.filter((_, index) => index !== selectedRow);
+            accounts.splice(selectedRow, 1);
 
             // Keep selectedRow at 0 (always use first account)
             chrome.storage.local.set({ accounts: accounts, selectedRow: 0 }, () => {
