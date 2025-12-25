@@ -544,9 +544,48 @@
     if (filled > 0) {
       console.log('[FIFA] Auto-filled', filled, 'fields');
       showNotification(`Auto-filled ${filled} fields!`);
+
+      // Auto-delete: Remove used account from storage and move to next
+      await removeUsedAccount();
     }
     // NO auto-retry, NO mutation observer, NO URL listener
     // User can press Alt+A to fill again if needed
+  }
+
+  // Remove the current account from storage after use
+  async function removeUsedAccount() {
+    return new Promise((resolve) => {
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        chrome.storage.local.get(['accounts', 'selectedRow'], (result) => {
+          let accounts = result.accounts || [];
+          const selectedRow = result.selectedRow || 0;
+
+          if (accounts.length > 0 && selectedRow < accounts.length) {
+            const removedAccount = accounts[selectedRow];
+            console.log('[FIFA] Removing used account:', removedAccount.email);
+
+            // Remove the account at selectedRow
+            accounts.splice(selectedRow, 0);
+            accounts = accounts.filter((_, index) => index !== selectedRow);
+
+            // Keep selectedRow at 0 (always use first account)
+            chrome.storage.local.set({ accounts: accounts, selectedRow: 0 }, () => {
+              console.log('[FIFA] Account removed. Remaining accounts:', accounts.length);
+              if (accounts.length > 0) {
+                showNotification(`Account used & removed. ${accounts.length} accounts left.`);
+              } else {
+                showNotification('All accounts used! Add more to accounts.csv', false);
+              }
+              resolve();
+            });
+          } else {
+            resolve();
+          }
+        });
+      } else {
+        resolve();
+      }
+    });
   }
 
   // ========== TICKET SELECTOR FUNCTIONS ==========
