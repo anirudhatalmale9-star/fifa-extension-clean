@@ -538,65 +538,16 @@
       return;
     }
 
-    // Run autofill
+    // Run autofill ONCE only
     const filled = await runAutofill(currentAccount);
 
     if (filled > 0) {
       console.log('[FIFA] Auto-filled', filled, 'fields');
       showNotification(`Auto-filled ${filled} fields!`);
     }
-
-    // Wait 2 seconds and try again for any dropdowns that weren't loaded yet
-    await new Promise(r => setTimeout(r, 2000));
-    await runAutofill(currentAccount);
+    // NO auto-retry, NO mutation observer, NO URL listener
+    // User can press Alt+A to fill again if needed
   }
-
-  // Watch for dynamic content changes (SPA navigation)
-  function setupMutationObserver() {
-    let debounceTimer = null;
-    const observer = new MutationObserver((mutations) => {
-      // Check if new form elements were added or page changed significantly
-      let hasNewForms = false;
-      for (const mutation of mutations) {
-        if (mutation.addedNodes.length > 0) {
-          for (const node of mutation.addedNodes) {
-            if (node.nodeType === 1) {
-              if (node.tagName === 'INPUT' || node.tagName === 'SELECT' ||
-                  node.tagName === 'FORM' || node.tagName === 'DIV' ||
-                  node.querySelector?.('input, select, form')) {
-                hasNewForms = true;
-                break;
-              }
-            }
-          }
-        }
-        if (hasNewForms) break;
-      }
-
-      if (hasNewForms) {
-        // Reset flag and debounce - shorter delay for faster response
-        autoFillAttempted = false;
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          console.log('[FIFA] Detected page change, running autofill...');
-          autoFillPage();
-        }, 500);
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
-
-  // Also listen for URL changes (SPA navigation)
-  let lastUrl = location.href;
-  setInterval(() => {
-    if (location.href !== lastUrl) {
-      lastUrl = location.href;
-      console.log('[FIFA] URL changed, resetting autofill...');
-      autoFillAttempted = false;
-      setTimeout(autoFillPage, 500);
-    }
-  }, 500);
 
   // ========== TICKET SELECTOR FUNCTIONS ==========
   function delay(ms) {
@@ -826,9 +777,9 @@
     });
   }
 
-  // Start auto-fill on page load
+  // Start auto-fill on page load (ONCE only)
+  // Press Alt+A to trigger autofill again manually
   console.log('[FIFA] All-in-One extension loaded');
   autoFillPage();
-  setupMutationObserver();
 
 })();
